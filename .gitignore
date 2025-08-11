@@ -1,0 +1,31 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go generate command
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work
+
+# Go module cache
+.cache/go-build/
+
+# IDE-specific files
+.idea/
+.vscode/
+*.swp
+*.bak
+*.tmp
+
+# Local development files
+.env
+.env.*
