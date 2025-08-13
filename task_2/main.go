@@ -132,11 +132,13 @@ func CheckBorders(mtx [][]rune, x_coord int, y_coord int, cell_width int, cell_h
 }
 
 func MakeGrid(mtx [][]rune, cell_width int, cell_height int, num_cells int) {
-	curr_cell := 0 //номер текущей добавленной ячейки
 
-	var curr_x int // x-координата фигуры
+	var curr_x int // x-координата фиsгуры
 	var curr_y int // y-координата фигуры
+
+	var curr_cell int //номер текущей добавленной ячейки
 	var curr_row int
+	var cell_in_row int // номер яцейки в ряду
 
 	for curr_cell < num_cells {
 
@@ -146,15 +148,17 @@ func MakeGrid(mtx [][]rune, cell_width int, cell_height int, num_cells int) {
 
 			curr_x += cell_height + cell_width
 			curr_cell++
-			if curr_cell%2 == 1 {
+
+			if cell_in_row%2 == 1 {
 				curr_y = (curr_row * 2 * cell_height) + cell_height
 			} else {
 				curr_y = (curr_row * 2 * cell_height)
 			}
-
+			cell_in_row++
 		} else {
 			curr_x = 0
 			curr_row++
+			cell_in_row = 0
 		}
 	}
 }
