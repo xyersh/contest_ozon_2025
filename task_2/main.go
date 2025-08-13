@@ -7,8 +7,11 @@ import (
 
 func main() {
 	matrix := CreateMatrix(40, 10)
-	PaintHex(matrix, 5, 1, 4, 3)
-	PaintHex(matrix, 10, 1, 4, 3)
+	// PaintHex(matrix, 5, 1, 4, 3)
+	// PaintHex(matrix, 10, 1, 4, 3)
+
+	MakeGrid(matrix, 2, 1, 15)
+
 	PrintMatrix(matrix)
 
 }
@@ -109,4 +112,49 @@ func PaintHex(mtx [][]rune, x, y, w, h int) {
 		}
 	}
 
+}
+
+func CheckBorders(mtx [][]rune, x_coord int, y_coord int, cell_width int, cell_height int) (res bool) {
+	x_grid_size := len(mtx[0])
+	y_grid_size := len(mtx)
+
+	// если фигура выходит за правый край матрицы
+	if x_coord+2*cell_height+cell_width > x_grid_size {
+		return false
+	}
+
+	// если фигура выходит за нижний край матрицы
+	if y_coord+2*cell_height > y_grid_size {
+		return false
+	}
+
+	return true
+}
+
+func MakeGrid(mtx [][]rune, cell_width int, cell_height int, num_cells int) {
+	curr_cell := 0 //номер текущей добавленной ячейки
+
+	var curr_x int // x-координата фигуры
+	var curr_y int // y-координата фигуры
+	var curr_row int
+
+	for curr_cell < num_cells {
+
+		// если фигура не выходит за границы сетки
+		if CheckBorders(mtx, curr_x, curr_y, cell_width, cell_height) {
+			PaintHex(mtx, curr_x, curr_y, cell_width, cell_height)
+
+			curr_x += cell_height + cell_width
+			curr_cell++
+			if curr_cell%2 == 1 {
+				curr_y = (curr_row * 2 * cell_height) + cell_height
+			} else {
+				curr_y = (curr_row * 2 * cell_height)
+			}
+
+		} else {
+			curr_x = 0
+			curr_row++
+		}
+	}
 }
