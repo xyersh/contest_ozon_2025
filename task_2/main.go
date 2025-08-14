@@ -12,15 +12,15 @@ import (
 var str = `3 3 1 1 1`
 
 func main() {
-	file, err := os.Open("data/1")
+	file, err := os.Open("data/9")
 	if err != nil {
 		fmt.Println(err)
 	}
 	defer file.Close()
 
-	reader := bufio.NewReader(strings.NewReader(str))
+	// reader := bufio.NewReader(strings.NewReader(str))
 
-	// reader := bufio.NewReader(file)
+	reader := bufio.NewReader(file)
 
 	// reader := bufio.NewReader(os.Stdin)
 
@@ -84,33 +84,33 @@ func PrintMatrix(matrix [][]rune) {
 
 }
 
-func PaintHex(mtx [][]rune, x, y, w, h int) {
+func PaintHex(mtx [][]rune, x_coord, y_coord, w, h int) {
 
 	// mtx - инициализированный двухмерный массив рун. В него рисуем фигуру.
-	// x - x-координата фигуры на сетке "mtx"
-	// y - y-координата фигуры на сетке "mtx"
+	// x_coord - x-координата фигуры на сетке "mtx"
+	// y_coord - y-координата фигуры на сетке "mtx"
 	// w - width фигуры
 	// h - hgeight фигуры
 
 	// Расчитываем нижнюю-правую границу фигуры
-	x_end := x + 2*h + w
-	y_end := y + 2*h
+	x_end := x_coord + 2*h + w
+	y_end := y_coord + 2*h
 
 	// Проверка на вхождение за границы сетки
 	if x_end > len(mtx[0]) {
 		x_end = len(mtx[0]) - 1
 	}
-	if y_end > len(mtx) {
+	if y_end >= len(mtx) {
 		y_end = len(mtx) - 1
 	}
 
 	// i - ряды
-	for i := y; i <= y_end; i++ {
+	for i := y_coord; i <= y_end; i++ {
 
 		//j - колонки
-		for j := x; j < x_end; j++ {
-			i_rel := i - y
-			j_rel := j - x
+		for j := x_coord; j < x_end; j++ {
+			i_rel := i - y_coord
+			j_rel := j - x_coord
 
 			//рисуем верхнюю и нижнюю грани фигуры
 			if (i_rel == 0) || (i_rel == 2*h) {
@@ -142,6 +142,7 @@ func PaintHex(mtx [][]rune, x, y, w, h int) {
 				if i_rel > h {
 					if j_rel < h*2+w {
 						if i_rel-j_rel == h+1 {
+							// fmt.Printf("i=%d j=%d", i, j)
 							mtx[i][j] = '\\'
 						}
 					}
@@ -164,6 +165,7 @@ func PaintHex(mtx [][]rune, x, y, w, h int) {
 }
 
 func CheckBorders(mtx [][]rune, x_coord int, y_coord int, cell_width int, cell_height int) (res string) {
+	// fmt.Printf("CheckBorders: \n	x_coord=%d y_coord=%d\n	cell_width=%d cell_height=%d\n", x_coord, y_coord, cell_width, cell_height)
 	x_grid_size := len(mtx[0])
 	y_grid_size := len(mtx)
 
@@ -173,7 +175,7 @@ func CheckBorders(mtx [][]rune, x_coord int, y_coord int, cell_width int, cell_h
 	}
 
 	// если фигура выходит за нижний край матрицы
-	if y_coord+2*cell_height > y_grid_size {
+	if y_coord+2*cell_height >= y_grid_size {
 		return "BOTTOM_BORDER"
 	}
 
