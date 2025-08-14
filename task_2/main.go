@@ -1,16 +1,47 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strings"
 )
 
+// var str = `30 10 4 2 6`
+
+var str = `3 3 1 1 1`
+
 func main() {
-	matrix := CreateMatrix(40, 10)
+	file, err := os.Open("data/1")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+
+	reader := bufio.NewReader(strings.NewReader(str))
+
+	// reader := bufio.NewReader(file)
+
+	// reader := bufio.NewReader(os.Stdin)
+
+	var (
+		x_grid_size int
+		y_grid_size int
+		hex_width   int
+		hex_height  int
+		num_of_hex  int
+	)
+
+	line, _ := reader.ReadString('\n')
+	fmt.Sscan(line, &x_grid_size, &y_grid_size, &hex_width, &hex_height, &num_of_hex)
+
+	// fmt.Printf("x_grid_size=%d y_grid_size=%d\nhex_width=%d hex_height=%d\nnum_of_hex=%d\n", x_grid_size, y_grid_size, hex_width, hex_height, num_of_hex)
+
+	matrix := CreateMatrix(x_grid_size, y_grid_size)
 	// PaintHex(matrix, 5, 1, 4, 3)
 	// PaintHex(matrix, 10, 1, 4, 3)
 
-	MakeGrid(matrix, 2, 1, 15)
+	MakeGrid(matrix, hex_width, hex_height, num_of_hex)
 
 	PrintMatrix(matrix)
 
@@ -61,38 +92,56 @@ func PaintHex(mtx [][]rune, x, y, w, h int) {
 	// w - width фигуры
 	// h - hgeight фигуры
 
-	for i := 0; i < len(mtx); i++ {
-		for j := 0; j < len(mtx[i]); j++ {
+	// Расчитываем нижнюю-правую границу фигуры
+	x_end := x + 2*h + w
+	y_end := y + 2*h
+
+	// Проверка на вхождение за границы сетки
+	if x_end > len(mtx[0]) {
+		x_end = len(mtx[0]) - 1
+	}
+	if y_end > len(mtx) {
+		y_end = len(mtx) - 1
+	}
+
+	// i - ряды
+	for i := y; i <= y_end; i++ {
+
+		//j - колонки
+		for j := x; j < x_end; j++ {
+			i_rel := i - y
+			j_rel := j - x
 
 			//рисуем верхнюю и нижнюю грани фигуры
-			if (i == y) || (i == y+2*h) {
-				if (j < x+(h+w)) && (j >= x+h) {
+			if (i_rel == 0) || (i_rel == 2*h) {
+				if (j_rel < (h + w)) && (j_rel >= h) {
 					mtx[i][j] = '_'
+					// fmt.Println("test")
 				}
 			}
 
 			// рисуем верхнюю-левую грань
-			if (i - y) <= h {
-				if (i - y) > 0 {
-					if (i-y)+(j-x) == h {
+			if i_rel <= h {
+				if i_rel > 0 {
+					if i_rel+j_rel == h {
 						mtx[i][j] = '/'
 					}
 				}
 			}
 			// рисуем верхнюю-правую грань
-			if (i - y) > 0 {
-				if (j - x) < h*2+w {
-					if (j-x)-(i-y) == w+h-1 {
+			if i_rel > 0 {
+				if j_rel < h*2+w {
+					if j_rel-i_rel == w+h-1 {
 						mtx[i][j] = '\\'
 					}
 				}
 			}
 
 			// рисуем нижнюю-левую грань
-			if i-y <= 2*h {
-				if (i - y) > h {
-					if (j - x) < h*2+w {
-						if (i-y)-(j-x) == h+1 {
+			if i_rel <= 2*h {
+				if i_rel > h {
+					if j_rel < h*2+w {
+						if i_rel-j_rel == h+1 {
 							mtx[i][j] = '\\'
 						}
 					}
@@ -100,10 +149,10 @@ func PaintHex(mtx [][]rune, x, y, w, h int) {
 			}
 
 			// рисуем нижнюю-правую грань
-			if (i - y) <= 2*h {
-				if (i - y) > 0 {
-					if (j - x) < h*2+w {
-						if (i-y)+(j-x) == h*3+w {
+			if i_rel <= 2*h {
+				if i_rel > 0 {
+					if j_rel < h*2+w {
+						if i_rel+j_rel == h*3+w {
 							mtx[i][j] = '/'
 						}
 					}
@@ -114,21 +163,21 @@ func PaintHex(mtx [][]rune, x, y, w, h int) {
 
 }
 
-func CheckBorders(mtx [][]rune, x_coord int, y_coord int, cell_width int, cell_height int) (res bool) {
+func CheckBorders(mtx [][]rune, x_coord int, y_coord int, cell_width int, cell_height int) (res string) {
 	x_grid_size := len(mtx[0])
 	y_grid_size := len(mtx)
 
 	// если фигура выходит за правый край матрицы
 	if x_coord+2*cell_height+cell_width > x_grid_size {
-		return false
+		return "RIGHT_BORDER"
 	}
 
 	// если фигура выходит за нижний край матрицы
 	if y_coord+2*cell_height > y_grid_size {
-		return false
+		return "BOTTOM_BORDER"
 	}
 
-	return true
+	return "OK"
 }
 
 func MakeGrid(mtx [][]rune, cell_width int, cell_height int, num_cells int) {
@@ -142,23 +191,40 @@ func MakeGrid(mtx [][]rune, cell_width int, cell_height int, num_cells int) {
 
 	for curr_cell < num_cells {
 
-		// если фигура не выходит за границы сетки
-		if CheckBorders(mtx, curr_x, curr_y, cell_width, cell_height) {
-			PaintHex(mtx, curr_x, curr_y, cell_width, cell_height)
+		if cell_in_row%2 == 1 {
+			// fmt.Printf("odd\n")
+			curr_y = (curr_row * 2 * cell_height) + cell_height
+		} else {
+			// fmt.Printf("even\n")
+			curr_y = (curr_row * 2 * cell_height)
+		}
 
+		// fmt.Printf("curr_row=%d  curr_x=%d  curr_y=%d cell_in_row=%d\n", curr_row, curr_x, curr_y, cell_in_row)
+
+		//  если фигура не выходит за границы сетки
+		switch CheckBorders(mtx, curr_x, curr_y, cell_width, cell_height) {
+		case "OK":
+			// fmt.Printf("CheckBorders = OK\n")
+			PaintHex(mtx, curr_x, curr_y, cell_width, cell_height)
 			curr_x += cell_height + cell_width
 			curr_cell++
 
-			if cell_in_row%2 == 1 {
-				curr_y = (curr_row * 2 * cell_height) + cell_height
-			} else {
-				curr_y = (curr_row * 2 * cell_height)
+			cell_in_row += 1
+
+		case "BOTTOM_BORDER":
+			// fmt.Printf("CheckBorders = BOTTOM_BORDER\n")
+			if curr_x == 0 {
+				break // если выходим за границы на  первом же элементе в ряду - выходим нафиг
 			}
+			curr_x += cell_height + cell_width
 			cell_in_row++
-		} else {
+		case "RIGHT_BORDER":
+			// fmt.Printf("CheckBorders = RIGHT_BORDER\n")
+
 			curr_x = 0
 			curr_row++
 			cell_in_row = 0
+
 		}
 	}
 }
