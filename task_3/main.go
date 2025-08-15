@@ -7,13 +7,8 @@ import (
 	"strings"
 )
 
-var str = `2
-10 12
-20 24
-`
-
 func main() {
-	file, err := os.Open("data/1")
+	file, err := os.Open("data/7")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -51,6 +46,8 @@ func main() {
 		}
 
 		mtx.Print()
+		mtx.findCellSize()
+		fmt.Printf("cell_width = %d  cell_height = %d \n", mtx.cell_width, mtx.cell_height)
 
 	}
 
@@ -102,6 +99,52 @@ func (m *Matrix) Print() {
 // ищет размерность ячеек
 func (m *Matrix) findCellSize() {
 
+	cell_width := 0
+	cell_height := 0
+	cell_width_calc := false
+	cell_height_calc := false
+
+tag:
+	for y := 0; y < int(m.y_size); y++ {
+		for x := 0; x < int(m.x_size); x++ {
+			if m.field[y][x] != ' ' {
+				switch m.field[y][x] {
+				case '_':
+					_x := x
+					for !cell_width_calc {
+
+						if (_x >= int(m.x_size)) || (m.field[y][_x] != '_') {
+
+							cell_width_calc = true
+							break
+						}
+						cell_width++
+						_x++
+					}
+				case '/':
+					_x := x
+					_y := y
+					for !cell_height_calc {
+
+						if (_x < 0 || _y >= int(m.y_size)) || (m.field[_y][_x] != '/') {
+							cell_height_calc = true
+							break
+						}
+						cell_height++
+						_x--
+						_y++
+					}
+				default:
+					continue
+				}
+			}
+			if cell_width_calc && cell_height_calc {
+				m.cell_width = Dimension(cell_width)
+				m.cell_height = Dimension(cell_height)
+				break tag
+			}
+		}
+	}
 }
 
 // ищет стартовую позицию для дальнейшего обхода по ячекам
