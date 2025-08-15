@@ -65,6 +65,9 @@ type Matrix struct {
 
 	cell_width  Dimension // размер верхней и нижней граней шестиугольника
 	cell_height Dimension // размер каждой из боковых граней шестиугольника
+
+	x_anchor_pos Dimension // x-координата стартовой точки поиска
+	y_anchor_pos Dimension // y-координата стартовой точки поиска
 }
 
 func NewMatrix(x_size, y_size Dimension) *Matrix {
@@ -93,5 +96,20 @@ func (m *Matrix) Print() {
 	}
 
 	fmt.Println(bldr.String())
+
+}
+
+// ищет размерность ячеек
+func (m *Matrix) findCellSize() {
+
+}
+
+// ищет стартовую позицию для дальнейшего обхода по ячекам
+func (m *Matrix) findAnchorPos() {
+
+}
+
+// рисует воду там где нужно по условию
+func (m *Matrix) PaintWater() {
 
 }
