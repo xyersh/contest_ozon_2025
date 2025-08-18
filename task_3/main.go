@@ -7,16 +7,30 @@ import (
 	"strings"
 )
 
+var str = `1
+10 11
+       _   
+      / \  
+     /   \ 
+   _/     \
+  / \     /
+ /   \   / 
+/     \_/  
+\     /    
+ \   /     
+  \_/      
+`
+
 func main() {
-	file, err := os.Open("data/7")
+	file, err := os.Open("data/1")
+
 	if err != nil {
 		fmt.Println(err)
 	}
 	defer file.Close()
+	reader := bufio.NewReader(file)
 
 	// reader := bufio.NewReader(strings.NewReader(str))
-
-	reader := bufio.NewReader(file)
 
 	// reader := bufio.NewReader(os.Stdin)
 
@@ -31,7 +45,7 @@ func main() {
 	for i := 0; i < num_of_levels; i++ {
 		fmt.Fscan(reader, &y_size, &x_size)
 		reader.ReadString('\n')
-		fmt.Printf("x_size = %d  y_size = %d\n", x_size, y_size)
+		// fmt.Printf("x_size = %d  y_size = %d\n", x_size, y_size)
 
 		mtx := NewMatrix(x_size, y_size)
 
@@ -45,10 +59,10 @@ func main() {
 			// fmt.Println(string(mtx.field[j]))
 		}
 
-		mtx.Print()
+		// mtx.Print()
 
 		mtx.findCellSize()
-		fmt.Printf("cell_width = %d   cell_height=%d\n", mtx.cell_width, mtx.cell_height)
+		// fmt.Printf("cell_width = %d   cell_height=%d\n", mtx.cell_width, mtx.cell_height)
 		mtx.PaintWater()
 		// mtx._printCopy()
 		mtx.Print()
@@ -181,19 +195,22 @@ tag:
 
 // рисует воду там где нужно по условию
 func (m *Matrix) PaintWater() {
-	fmt.Printf("PaintWater() - START\n")
-	for y := 0; y <= (int(m.y_size) - (2*int(m.cell_height) + int(m.cell_width))); y += 2 * int(m.cell_height) {
-		fmt.Printf("y=%d\n", y)
+	// fmt.Printf("PaintWater() - START\n")
+	for y := 0; y < (int(m.y_size) - 2*int(m.cell_height)); y += int(m.cell_height) {
+		// fmt.Printf("y=%d\n", y)
 		cell_in_row := 0
 		var _y = y
-		for x := 0; x <= int(m.x_size)-(2*int(m.cell_height)+int(m.cell_width))+1; x += int(m.cell_height) + int(m.cell_width) {
-			fmt.Printf("x=%d\n", x)
-			if cell_in_row%2 == 1 {
-				_y = y + int(m.cell_height)
-			} else {
-				_y = y
-			}
 
+		start_x_idx := strings.IndexRune(string(m.field[y]), '_') - int(m.cell_height)
+
+		for x := start_x_idx; x <= int(m.x_size)-(2*int(m.cell_height)+int(m.cell_width))+1; x += int(m.cell_height) + int(m.cell_width) {
+			// fmt.Printf("x=%d\n", x)
+			// if cell_in_row%2 == 1 {
+			// 	_y = y + int(m.cell_height)
+			// } else {
+			// 	_y = y
+			// }
+			// fmt.Printf("_y=%d\n", _y)
 			if m._isCell(x, _y) {
 				m._markGroundCell(x, _y)
 			}
@@ -206,45 +223,60 @@ func (m *Matrix) PaintWater() {
 }
 
 // проверяет, является ли содержиимое блока ячейкой
-func (m *Matrix) _isCell(x, y int) bool {
-	fmt.Printf("_isCell(x=%d, y=%d)\n", x, y)
+func (m *Matrix) _isCell(x, y int) (res bool) {
+	// fmt.Printf("_isCell(x=%d, y=%d)\n", x, y)
+	// defer func() {
+	// 	fmt.Printf("_isCell(x=%d, y=%d) = %t\n", x, y, res)
+	// }()
+
+	res = true
+	if x < 0 || y < 0 {
+		res = false
+		return
+	}
 
 	// проверка верхней стороны
 	if m.field[y][x+int(m.cell_height)] != '_' {
-		fmt.Printf("		test 1 sym=%c\n", m.field[y][x+int(m.cell_height)])
-		return false
+		// fmt.Printf("		test 1 sym=%c\n", m.field[y][x+int(m.cell_height)])
+		res = false
+		return
 	}
 	// проверка нижней стороны
 	if m.field[y+2*int(m.cell_height)][x+int(m.cell_height)] != '_' {
-		fmt.Printf("		test 2 sym= %c\n", m.field[y][x+int(m.cell_height)])
-		return false
+		// fmt.Printf("		test 2 sym= %c\n", m.field[y][x+int(m.cell_height)])
+		res = false
+		return
 	}
 
 	// проверка  левой верхней стороны
 	if m.field[y+1][x+int(m.cell_height)-1] != '/' {
-		fmt.Println("		test 3")
-		return false
+		// fmt.Println("		test 3")
+		res = false
+		return
 	}
 
 	// проверка левой нижней  стороны
 	if m.field[y+2*int(m.cell_height)][x+int(m.cell_height)-1] != '\\' {
-		fmt.Println("		test 4")
-		return false
+		// fmt.Println("		test 4")
+		res = false
+		return
 	}
 
 	// проверка правой верхней стороны
 	if m.field[y+1][x+int(m.cell_height+m.cell_width)] != '\\' {
-		fmt.Println("		test 5")
-		return false
+		// fmt.Println("		test 5")
+		res = false
+		return
 	}
 
 	// проверка  стороны
 	if m.field[y+2*int(m.cell_height)][x+int(m.cell_height+m.cell_width)] != '/' {
-		fmt.Println("		test 6")
-		return false
+		// fmt.Println("		test 6")
+		res = false
+		return
 	}
 
-	return true
+	return
 }
 
 func (m *Matrix) _getBorder(x_pos, y_pos int) [][]rune {
@@ -257,15 +289,16 @@ func (m *Matrix) _getBorder(x_pos, y_pos int) [][]rune {
 }
 
 func (m *Matrix) _markGroundCell(x_pos, y_pos int) {
-	fmt.Printf("_markGroundCell(x_pos=%d, y_pos=%d)\n", x_pos, y_pos)
+	// fmt.Printf("_markGroundCell(x_pos=%d, y_pos=%d)\n", x_pos, y_pos)
 	//маркируем ячейки - как землю ('*')
 
 	border := m._getBorder(x_pos, y_pos)
 
-	_printBorder(border)
+	// _printBorder(border)
 	// fmt.Printf(" border len = %d\n", len(border))
 	for y := 0; y < len(border); y++ {
 		// fmt.Printf("y=%d test %s\n", y, string(border[y]))
+
 		// проверка верхней и нижней сторон ячейки
 		if y == 0 || y == len(border)-1 {
 
@@ -286,7 +319,7 @@ func (m *Matrix) _markGroundCell(x_pos, y_pos int) {
 				first_idx := strings.IndexRune(string(border[y]), '/')
 				last_idx := strings.IndexRune(string(border[y]), '\\')
 
-				// fmt.Printf("first_idx=%d  last_idx=%d \n ", first_idx, last_idx)
+				// fmt.Printf("upper side  %d'nth row first_idx=%d  last_idx=%d \n ", y, first_idx, last_idx)
 
 				for x := first_idx; x <= last_idx; x++ {
 					m.field_copy[y_pos+y][x_pos+x] = '*'
@@ -296,12 +329,12 @@ func (m *Matrix) _markGroundCell(x_pos, y_pos int) {
 			//нижние боковые стороны (проверка символов '/'  и '\')
 			if y > int(m.cell_height) {
 
-				first_idx := strings.IndexRune(string(m.field[y]), '\\')
-				last_idx := strings.IndexRune(string(m.field[y]), '/')
-
+				first_idx := strings.IndexRune(string(border[y]), '\\')
+				last_idx := strings.IndexRune(string(border[y]), '/')
+				// fmt.Printf("lower side  %d'nth row first_idx=%d last_idx=%d\n", y, first_idx, last_idx)
 				for x := first_idx; x <= last_idx; x++ {
-					// fmt.Printf("in cycle x=%d y=%d first_idx=%d last_idx=%d\n", x, y, first_idx, last_idx)
-					m.field_copy[y][x] = '*'
+
+					m.field_copy[y_pos+y][x_pos+x] = '*'
 				}
 			}
 
@@ -324,6 +357,7 @@ func (m *Matrix) _markWater() {
 }
 
 func _printBorder(b [][]rune) {
+	fmt.Println("_printBorder() - START")
 	for i := 0; i < len(b); i++ {
 		fmt.Println(string(b[i]))
 	}
