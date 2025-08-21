@@ -16,20 +16,31 @@ func main() {
 	fmt.Fscan(reader, &t)
 
 	for i := 0; i < t; i++ {
+
+		// n - кол-во строк поля
+		// m - кол-во столбцов поля
 		var n, m int
 
-		//
+		var (
+			// координаты начального пункта
+			startR int // Y
+			startC int // X
+
+			// координаты конечного пункта
+			endR int // Y
+			endC int // X
+		)
+
 		fmt.Fscan(reader, &n, &m)
 
-		grid := make([][]rune, n) // сетка с гексагонами
+		// сетка с гексагонами высотой n строк
+		grid := make([][]rune, n)
 		for j := 0; j < n; j++ {
 
 			line, _ := reader.ReadString('\n')
 			line = strings.TrimRight(line, "\n")
 			grid[j] = []rune(line)
 		}
-
-		var startR, startC, endR, endC int
 
 		fmt.Fscan(reader, &startR, &startC) //
 		fmt.Fscan(reader, &endR, &endC)     //
